@@ -22,7 +22,8 @@ struct ContentView: View {
                     }
                 }
             }
-            .navigationTitle("To Do Tacker")
+            .background(Color.blue.opacity(0.4))
+            .navigationTitle("TO DO TRACKER")
             .listStyle(.sidebar)
             .toolbar {
                 Button {
@@ -40,6 +41,7 @@ struct ContentView: View {
                 }
             } else {
                 ContentUnavailableView("Select a group", systemImage: "sidebar.left")
+                    .background(Color.gray.opacity(0.1))
             }
         }
         .sheet(isPresented: $isShowingAddGroup) {
@@ -48,7 +50,6 @@ struct ContentView: View {
                 selectedGroup = newGroup
             }
         }
-        .padding()
     }
 }
 

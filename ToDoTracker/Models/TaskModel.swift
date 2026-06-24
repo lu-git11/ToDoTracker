@@ -23,11 +23,11 @@ struct TaskGroup: Identifiable, Hashable {
 
 extension TaskGroup {
     static let sampleData: [TaskGroup] = [
-        TaskGroup(title: "school",
+        TaskGroup(title: "School",
                   symbolName: "book.fill",
                   tasks: [ TaskItem(title: "Do Homework"),
                            TaskItem(title: " Do Exam")]),
-        TaskGroup(title: "home",
+        TaskGroup(title: "Home",
                   symbolName: "house.fill",
                   tasks: [ TaskItem(title: "Cook Dinner"),
                            TaskItem(title: "Clean Room", isCompleted: true)])

@@ -57,7 +57,3 @@ struct NewGroupView: View {
     }//end body
 }//end struct
 
-#Preview {
-    ContentView()
-}
-

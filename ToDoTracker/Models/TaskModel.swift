@@ -22,6 +22,9 @@ struct TaskGroup: Identifiable, Hashable, Codable {
 }
 
 extension TaskGroup {
+    var completedCount: Int { tasks.filter { $0.isCompleted}.count }
+    var progress: Double { tasks.isEmpty ? 0 : Double(completedCount)/Double(tasks.count)
+    }
     static let sampleData: [TaskGroup] = [
         TaskGroup(title: "School",
                   symbolName: "book.fill",

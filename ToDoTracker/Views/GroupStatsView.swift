@@ -17,22 +17,13 @@ struct GroupStatsView: View {
     var body: some View {
         HStack {
             ZStack {
-                Circle()
-                    .stroke(lineWidth: 10)
-                    .opacity(0.2)
-                    .foregroundColor(.cyan)
-                Circle()
-                    .trim(from: 0.0, to: progress)
-                    .stroke(style: StrokeStyle(lineWidth: 10, lineCap: .round))
-                    .foregroundColor(.cyan)
-                    .rotationEffect(.degrees(-90))
-                
+                ProgressRingView(progress: progress)
                 Text("\(Int(progress * 100))%")
                     .font(.caption)
                     .bold()
             }//end zstack
             .frame(width: 50, height: 50)
-            .padding()
+            .padding(5)
             
             VStack(alignment: .leading) {
                 Text("Progress Rings")
@@ -47,7 +38,7 @@ struct GroupStatsView: View {
         .padding()
         .background(Color(.secondarySystemBackground))
         .cornerRadius(12)
-        .padding(.horizontal)
+        .padding(.horizontal, 2)
     }
 }
 

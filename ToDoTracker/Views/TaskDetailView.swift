@@ -41,13 +41,24 @@ struct TaskDetailView: View {
                 group.tasks.remove(atOffsets: index)
             }
         }//end List
-        .navigationTitle(group.title)
+        .cornerRadius(20)
+        .navigationTitle("")
         .toolbar {
-            Button("Add Task +") {
-                withAnimation{
-                    group.tasks.append(TaskItem(title: ""))
-                }
-            }// end button
+            ToolbarItem(placement: .principal){
+                Text(group.title)
+                    .font(.system(size: 24, weight: .bold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            ToolbarItem(placement: .navigationBarTrailing){
+                Button("Add Task +") {
+                    withAnimation{
+                        group.tasks.append(TaskItem(title: ""))
+                    }
+                }// end button
+            }
         }//end Toolbar
+        .navigationBarTitleDisplayMode(.inline)
+        .scrollContentBackground(.hidden)
     } // end body
 }//end struct

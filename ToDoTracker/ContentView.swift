@@ -6,12 +6,16 @@
 //
 
 import SwiftUI
+import PencilKit
 
 struct ContentView: View {
     @State private var taskGroups : [TaskGroup] = []  //= TaskGroup.sampleData
     @State private var selectedGroup: TaskGroup?
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
     @State private var isShowingAddGroup = false
+    @State private var canvasView = PKCanvasView()
+    @State private var toolPicker = PKToolPicker()
+    @State private var isDrawing = false
     @Environment(\.scenePhase) private var scenePhase
     
     let saveKey = "savedTaskGroupsKey"
@@ -63,7 +67,9 @@ struct ContentView: View {
             } detail: {
                 ZStack {
                     BackgroundColor()
-                    if let group = selectedGroup {
+                    if isDrawing {
+                        CanvasView(canvasView: $canvasView, toolPicker: toolPicker)
+                    } else if let group = selectedGroup {
                         if let index = taskGroups.firstIndex(where: { $0.id == group.id}) {
                             TaskDetailView(group: $taskGroups[index])
                                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -75,6 +81,17 @@ struct ContentView: View {
                                 .symbolEffect(.pulse)
                         } description: {
                             Text("Pick a group from the sidebar, or create a new one.")
+                        }
+                    }
+                }
+                .toolbar {
+                    if selectedGroup != nil {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button {
+                                isDrawing.toggle()
+                            } label: {
+                                Image(systemName: "pencil.tip.crop.circle")
+                            }
                         }
                     }
                 }
@@ -118,8 +135,45 @@ struct ContentView: View {
     }
 }
 
+struct CanvasView: UIViewRepresentable {
+    @Binding var canvasView: PKCanvasView
+    var toolPicker: PKToolPicker
+    
+    func makeUIView(context: Context) -> PKCanvasView {
+        if #available(iOS 14.0, *) {
+            canvasView.drawingPolicy = .anyInput
+        } else {
+            canvasView.allowsFingerDrawing = true
+            return canvasView
+        }
+        canvasView.delegate = context.coordinator
+        return canvasView
+    }
+    
+    func updateUIView(_ UIView:PKCanvasView, context:Context) {
+        DispatchQueue.main.async {
+            toolPicker.setVisible(true, forFirstResponder: UIView)
+            toolPicker.addObserver(UIView)
+            UIView.becomeFirstResponder()
+        }
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    class Coordinator: NSObject, PKCanvasViewDelegate {
+        var parent: CanvasView
+        
+        init(_ parent: CanvasView) {
+            self.parent = parent
+        }
+    }
+}
+
 #Preview("Sample Data") {
     // Ensure no saved data interferes with the preview
     UserDefaults.standard.removeObject(forKey: "savedTaskGroupsKey")
     return ContentView()
 }
+

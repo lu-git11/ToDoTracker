@@ -42,7 +42,6 @@ struct TaskDetailView: View {
             }
         }//end List
         .cornerRadius(20)
-        .navigationTitle("")
         .toolbar {
             ToolbarItem(placement: .principal){
                 Text(group.title)
@@ -58,7 +57,6 @@ struct TaskDetailView: View {
                 }// end button
             }
         }//end Toolbar
-        .navigationBarTitleDisplayMode(.inline)
         .scrollContentBackground(.hidden)
     } // end body
 }//end struct

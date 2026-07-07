@@ -9,6 +9,7 @@ import SwiftUI
 import PencilKit
 
 struct ContentView: View {
+    @Binding var profile: Profile
     @State private var taskGroups : [TaskGroup] = []  //= TaskGroup.sampleData
     @State private var selectedGroup: TaskGroup?
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
@@ -17,19 +18,20 @@ struct ContentView: View {
     @State private var toolPicker = PKToolPicker()
     @State private var isDrawing = false
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.dismiss) private var dismiss
     
     let saveKey = "savedTaskGroupsKey"
     
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             List(selection: $selectedGroup) {
-                ForEach(taskGroups) { group in
+                ForEach(profile.groups) { group in
                     NavigationLink(value: group) {
-                        HStack(spacing: 12) {
+                        HStack(spacing: 20) {
                             Image(systemName: group.symbolName)
                                 .font(.subheadline.weight(.semibold))
                                 .foregroundStyle(.white)
-                                .frame(width: 30, height: 30)
+                                .frame(width: 35, height: 35)
                                 .background(.blue.gradient, in: RoundedRectangle(cornerRadius: 8))
                             
                             VStack(alignment: .leading, spacing: 2) {
@@ -46,7 +48,7 @@ struct ContentView: View {
                     }
                 }
             }
-            .navigationTitle("TO DO TRACKER")
+            .navigationTitle(profile.name)
             .listStyle(.sidebar)
             .scrollContentBackground(.hidden)
             .background{
@@ -56,6 +58,18 @@ struct ContentView: View {
                 }
             }
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.primary)
+                            .padding(8)
+                            .background(Circle().fill(Color.primary.opacity(0.1)))
+                    }
+                }
+                
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         isShowingAddGroup = true
@@ -64,62 +78,63 @@ struct ContentView: View {
                     }
                 }
             }
-            } detail: {
-                ZStack {
-                    BackgroundColor()
-                    if isDrawing {
-                        CanvasView(canvasView: $canvasView, toolPicker: toolPicker)
-                    } else if let group = selectedGroup {
-                        if let index = taskGroups.firstIndex(where: { $0.id == group.id}) {
-                            TaskDetailView(group: $taskGroups[index])
-                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                                .padding()
-                        }
-                    } else {
-                        ContentUnavailableView {
-                            Label("No Group Selected", systemImage: "checklist")
-                                .symbolEffect(.pulse)
-                        } description: {
-                            Text("Pick a group from the sidebar, or create a new one.")
-                        }
+        } detail: {
+            ZStack {
+                BackgroundColor()
+                if isDrawing {
+                    CanvasView(canvasView: $canvasView, toolPicker: toolPicker)
+                } else if let group = selectedGroup {
+                    if let index = profile.groups.firstIndex(where: { $0.id == group.id}) {
+                        TaskDetailView(group: $profile.groups[index])
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                            .padding()
                     }
-                }
-                .toolbar {
-                    if selectedGroup != nil {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            Button {
-                                isDrawing.toggle()
-                            } label: {
-                                Image(systemName: "pencil.tip.crop.circle")
-                            }
-                        }
+                } else {
+                    ContentUnavailableView {
+                        Label("No Group Selected", systemImage: "checklist")
+                            .symbolEffect(.pulse)
+                    } description: {
+                        Text("Pick a group from the sidebar, or create a new one.")
                     }
                 }
             }
-            .sheet(isPresented: $isShowingAddGroup) {
-                NewGroupView { newGroup in
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)){
-                        taskGroups.append(newGroup)
-                        selectedGroup = newGroup
+            .toolbar {
+                if selectedGroup != nil {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            isDrawing.toggle()
+                        } label: {
+                            Image(systemName: "pencil.tip.crop.circle")
+                        }
                     }
-                }
-            }
-            .onAppear() {
-                loadData()
-            }
-            .onChange(of: scenePhase) {oldValue, newValue in
-                if newValue == .active {
-                    print("User is active")
-                } else if newValue == .inactive {
-                    print("User is away")
-                } else if newValue == .background {
-                    saveData()
                 }
             }
         }
+        .navigationBarHidden(true)
+        .sheet(isPresented: $isShowingAddGroup) {
+            NewGroupView { newGroup in
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)){
+                    profile.groups.append(newGroup)
+                    selectedGroup = newGroup
+                }
+            }
+        }
+        .onAppear() {
+            loadData()
+        }
+        .onChange(of: scenePhase) {oldValue, newValue in
+            if newValue == .active {
+                print("User is active")
+            } else if newValue == .inactive {
+                print("User is away")
+            } else if newValue == .background {
+                saveData()
+            }
+        }
+    }
     
     func saveData() {
-        if let encodeData = try? JSONEncoder().encode(taskGroups) {
+        if let encodeData = try? JSONEncoder().encode(profile.groups) {
             UserDefaults.standard.set(encodeData, forKey: saveKey)
         }
     }
@@ -127,11 +142,13 @@ struct ContentView: View {
     func loadData() {
         if let savedData = UserDefaults.standard.data(forKey: saveKey) {
             if let decodedGroups = try? JSONDecoder().decode([TaskGroup].self, from: savedData) {
-                taskGroups = decodedGroups
+                profile.groups = decodedGroups
                 return
             }
         }
-        taskGroups = TaskGroup.sampleData
+        if profile.groups.isEmpty {
+            profile.groups = TaskGroup.sampleData
+        }
     }
 }
 
@@ -172,8 +189,17 @@ struct CanvasView: UIViewRepresentable {
 }
 
 #Preview("Sample Data") {
-    // Ensure no saved data interferes with the preview
-    UserDefaults.standard.removeObject(forKey: "savedTaskGroupsKey")
-    return ContentView()
+    PreviewWrapper()
 }
 
+private struct PreviewWrapper: View {
+    @State private var profile = Profile(name: "Sample User", profileImage: "", groups: TaskGroup.sampleData)
+
+    var body: some View {
+        // Ensure no saved data interferes with the preview
+        ContentView(profile: $profile)
+            .onAppear {
+                UserDefaults.standard.removeObject(forKey: "savedTaskGroupsKey")
+            }
+    }
+}

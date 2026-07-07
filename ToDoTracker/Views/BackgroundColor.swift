@@ -40,3 +40,20 @@ struct BackgroundColor: View {
         .ignoresSafeArea()
     }
 }
+
+//project file - info tab
+// Project - TODOTracker
+//add language in localization
+//localizable file should appear with the language added
+// product - export localizations - to desktop or anywhere
+// right click on xcloc file - show package contents
+//open localized contents
+//open xliff file
+// copy contents of this file
+//paste in AI, translate to language without changing the format of the file
+//" generate the russins xliff translation of this file, dont chnage the structure of the original file"
+//copy and paste in the xliff file, save
+//product - import localiztion
+// select the file of languageh
+//everything should show
+

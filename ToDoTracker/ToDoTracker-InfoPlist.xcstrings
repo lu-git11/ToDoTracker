@@ -17,6 +17,12 @@
             "value" : "ToDoTracker"
           }
         },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ToDoTracker"
+          }
+        },
         "th" : {
           "stringUnit" : {
             "state" : "translated",

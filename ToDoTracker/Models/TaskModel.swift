@@ -21,6 +21,13 @@ struct TaskGroup: Identifiable, Hashable, Codable {
     var tasks: [TaskItem]
 }
 
+struct Profile: Identifiable, Hashable, Codable {
+    var id = UUID()
+    var name: String
+    var profileImage: String
+    var groups: [TaskGroup]
+}
+
 extension TaskGroup {
     var completedCount: Int { tasks.filter { $0.isCompleted}.count }
     var progress: Double { tasks.isEmpty ? 0 : Double(completedCount)/Double(tasks.count)
@@ -34,5 +41,12 @@ extension TaskGroup {
                   symbolName: "house.fill",
                   tasks: [ TaskItem(title: "Cook Dinner"),
                            TaskItem(title: "Clean Room", isCompleted: true)])
+    ]
+}
+
+extension Profile {
+    static let sample: [Profile] = [
+        Profile(name: "Professor", profileImage: "professor", groups: TaskGroup.sampleData),
+        Profile(name: "Student", profileImage: "student", groups: []),
     ]
 }
